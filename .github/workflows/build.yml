@@ -1,0 +1,31 @@
+name: build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+
+      # 用 bash 调脚本，不用 ./：从 Windows 提交的文件可能没有可执行位。
+      - name: Build
+        run: bash build.sh
+
+      # 跑起来才算过。异常会以非 0 退出，直接把 job 干红。
+      - name: Run 26.3
+        run: bash run.sh 26.3
+
+      - name: Run 1.20.1
+        run: bash run.sh 1.20.1
