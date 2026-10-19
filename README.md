@@ -31,6 +31,54 @@ JDK 24+，纯 javac + jar：
 
 `game/` 只参与编译，不进运行时 classpath，否则类加载器拦不住它，织入就不会发生。
 
+从 Actions 下载产物需要登录 GitHub（公开仓也一样）。只是跑 demo 的话，clone 下来 `build.sh` 更省事。
+
+## 写个 mod
+
+最小 mod 就是一个类加一个 `mod.json`。类必须落在 `net.nico.mods.*` 下——加载器只拦这个前缀，玩具的硬限制。入口实现 `ModInitializer`：
+
+```java
+package net.nico.mods.clock;
+
+import net.nico.miniloader.api.*;
+
+public class ClockMod implements ModInitializer {
+    private int frame;
+
+    @Override
+    public void onInitialize(ModContext context) {
+        context.onRender(f -> f.text(34, 13, "clock frame " + (++frame)));
+    }
+}
+```
+
+`mod.json`：
+
+```json
+{
+  "id": "clock",
+  "entrypoint": "net.nico.mods.clock.ClockMod",
+  "mixins": []
+}
+```
+
+编译打包（`api-classes` 是 mod 接口；要引用游戏类再挂 `game-classes`，且只进编译期）：
+
+```bash
+javac -cp api-classes -d classes src/net/nico/mods/clock/ClockMod.java
+cp src/mod.json classes/
+jar --create --file mods/clock.jar -C classes .
+```
+
+把 jar 丢进 `<根目录>/mods/`，启动：
+
+```bash
+java -cp "loader-classes:api-classes" net.nico.miniloader.MiniLoader <根目录> 26.3
+# Windows 下 classpath 分隔符换成 ;，根目录下要有 game-classes/ 和 mods/
+```
+
+这个 clock 是实测过的：同一份 jar，26.3 和 1.20.1 上都正常出画。
+
 ## 目录
 
 ```
