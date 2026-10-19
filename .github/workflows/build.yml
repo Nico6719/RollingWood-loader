@@ -29,3 +29,12 @@ jobs:
 
       - name: Run 1.20.1
         run: bash run.sh 1.20.1
+
+      # 产物：loader/api 的 class + 三个 mod jar + 假游戏 class（run.sh 跑 demo 要用）。
+      # 不留太久，玩具仓的构建产物没必要囤着。
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: rollingwood-build
+          path: out/
+          retention-days: 14
