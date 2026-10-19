@@ -1,0 +1,27 @@
+{
+  "id": "hello",
+  "name": "Hello Mod",
+  "version": "1.0.0",
+  "entrypoint": "net.nico.mods.hello.HelloMod",
+  "depends": {},
+  "mixins": [
+    {
+      "target": "net.nico.fakegame.Server",
+      "method": "start",
+      "at": "HEAD",
+      "handler": "net.nico.mods.hello.HelloMixin#onServerStart"
+    },
+    {
+      "target": "net.nico.fakegame.Server",
+      "method": "describe",
+      "at": "RETURN",
+      "handler": "net.nico.mods.hello.HelloMixin#onDescribeReturn"
+    },
+    {
+      "target": "net.nico.fakegame.Server",
+      "method": "status",
+      "at": "TAIL",
+      "handler": "net.nico.mods.hello.HelloMixin#onStatusTail"
+    }
+  ]
+}

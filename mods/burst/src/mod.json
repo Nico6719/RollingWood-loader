@@ -1,0 +1,24 @@
+{
+  "id": "burst",
+  "name": "Burst Mod",
+  "version": "2.1.0",
+  "entrypoint": "net.nico.mods.burst.BurstMod",
+  "depends": {
+    "hello": ">=1.0.0"
+  },
+  "mixins": [
+    {
+      "target": "net.nico.fakegame.Server",
+      "method": "shutdown",
+      "at": "HEAD",
+      "handler": "net.nico.mods.burst.BurstMixin#onShutdown"
+    },
+    {
+      "target": "net.nico.fakegame.Server",
+      "method": "tick",
+      "kind": "REDIRECT",
+      "call": "net.nico.fakegame.Server#describe",
+      "handler": "net.nico.mods.burst.BurstMixin#onDescribe"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+# 构建产物（build.sh 生成，随时可重新构建）
+out/
+
+# 运行时目录（run.sh 生成）
+run/
+
+# 编辑器/系统杂物
+*.class
+.DS_Store
+.idea/
+.vscode/

@@ -1,0 +1,111 @@
+[run] 滚木加载器 / RollingLog Loader
+[run] 目标版本：26.3
+[run] 运行时 classpath = loader-classes:api-classes（不含 game-classes）
+
+=== 滚木加载器 / RollingLog Loader 启动 ===
+[滚木] 本义：垫在重物下靠滚动摩擦省力的圆木 —— 我们真能把 mod 滚起来
+[滚木] 梗义：不存在 · 空白 · 无价值 —— 那是留给隔壁 Forbric 的
+[loader] 目标版本：26.3（已去混淆，名字即真名）
+[loader] 游戏主类运行时名：net.nico.fakegame.Server
+[loader] 黑屏启动：原版 背景/世界/UI/UI文字 四层渲染全熄，屏幕交给 mod 自己画
+[loader] 在 mods 目录发现 3 个 jar
+[loader] 依赖解析完成，初始化顺序：[hello, burst, painter]
+[loader] 织入计划：1 个目标类
+          net.nico.fakegame.Server :: start@HEAD  <-  net.nico.mods.hello.HelloMixin#onServerStart  [INJECT]
+          net.nico.fakegame.Server :: describe@RETURN  <-  net.nico.mods.hello.HelloMixin#onDescribeReturn  [INJECT]
+          net.nico.fakegame.Server :: status@TAIL  <-  net.nico.mods.hello.HelloMixin#onStatusTail  [INJECT]
+          net.nico.fakegame.Server :: shutdown@HEAD  <-  net.nico.mods.burst.BurstMixin#onShutdown  [INJECT]
+          net.nico.fakegame.Server :: tick 内的 net.nico.fakegame.Server#describe  <-  net.nico.mods.burst.BurstMixin#onDescribe  [REDIRECT]
+          net.nico.fakegame.Server :: render 内的 net.nico.fakegame.Server#drawBackground  <-  net.nico.miniloader.BlankBoot#dropBackground  [REDIRECT]  [内置·黑屏]
+          net.nico.fakegame.Server :: render 内的 net.nico.fakegame.Server#drawWorld  <-  net.nico.miniloader.BlankBoot#dropWorld  [REDIRECT]  [内置·黑屏]
+          net.nico.fakegame.Server :: render 内的 net.nico.fakegame.Server#drawUi  <-  net.nico.miniloader.BlankBoot#dropUi  [REDIRECT]  [内置·黑屏]
+          net.nico.fakegame.Server :: render 内的 net.nico.fakegame.Server#drawText  <-  net.nico.miniloader.BlankBoot#dropText  [REDIRECT]  [内置·黑屏]
+          net.nico.fakegame.Server :: render 内的 net.nico.fakegame.Server#present  <-  net.nico.miniloader.BlankBoot#present  [REDIRECT]  [内置·黑屏]
+[hello] 初始化完成，准备在 Server.start 上织入问候语
+[burst] 初始化完成（我声明了依赖 hello，所以一定排在它之后初始化）
+[painter] 已注册重绘回调：原版不画，那就都由我来画
+[loader] 已织入 net.nico.fakegame.Server（10 条 mixin）
+          [字节码实测] start() 里 onServerStart 出现 1 次
+          [字节码实测] describe() 里 onDescribeReturn 出现 3 次
+          [字节码实测] status() 里 onStatusTail 出现 1 次
+          [字节码实测] shutdown() 里 onShutdown 出现 1 次
+          [字节码实测] tick() 里 onDescribe 出现 1 次
+          [字节码实测] render() 里 dropBackground 出现 1 次
+          [字节码实测] render() 里 dropWorld 出现 1 次
+          [字节码实测] render() 里 dropUi 出现 1 次
+          [字节码实测] render() 里 dropText 出现 1 次
+          [字节码实测] render() 里 present 出现 1 次
+[loader] 游戏类由 KnotClassLoader 加载
+[hello] ★ HEAD 注入：这条是织进 Server.start() 开头的代码 ★
+[game] Server 启动完成，motd=MiniLoader 演示服务端
+[game] tick 第 1 次，状态：[burst] 我把 describe() 整个换掉了（当时已跑 1 tick）
+【第 1 帧 · 原版 背景/世界/UI/UI文字 四层已熄灭，屏幕上只有 mod 自己画的】
++----------------------------------------------------------+
+|                                                          |
+|                                                          |
+|                                                          |
+|                                                          |
+|                                                          |
+|                                                          |
+|                                                          |
+|                                                          |
+|                                                          |
+|                                                          |
+|                                                          |
+|                                                          |
+|                                                          |
+|                                                          |
++----------------------------------------------------------+
+[game] tick 第 2 次，状态：[burst] 我把 describe() 整个换掉了（当时已跑 2 tick）
+【第 2 帧 · 原版 背景/世界/UI/UI文字 四层已熄灭，屏幕上只有 mod 自己画的】
++----------------------------------------------------------+
+|      ◆ 滚木画坊 —— 屏幕上每个像素都是本 mod 画的 ◆       |
+|                                                          |
+|   ☁        ^^^      ^^^^^^        ☁                      |
+|▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓|
+|  ▲▲  原版世界早被熄了，这是 mod 重新搭的                 |
+|                                                          |
+| +--------------------------++--------------------------+ |
+| | HP [███████░░░]  80/120  || [聊天] 凛：哼，全是我画的| |
+| | Score 1337 · 帧 2/3      || [聊天] 不动笔你只能盯黑屏| |
+| +--------------------------++--------------------------+ |
+|                                                          |
+|  [原版四层] 背景✗ 世界✗ UI✗ 文字✗    [mod 重绘] ✓        |
+|  想看别的画面？再写个 mod 来抢画笔啊                     |
+|                                                          |
++----------------------------------------------------------+
+[game] tick 第 3 次，状态：[burst] 我把 describe() 整个换掉了（当时已跑 3 tick）
+【第 3 帧 · 原版 背景/世界/UI/UI文字 四层已熄灭，屏幕上只有 mod 自己画的】
++----------------------------------------------------------+
+|      ◆ 滚木画坊 —— 屏幕上每个像素都是本 mod 画的 ◆       |
+|                                                          |
+|   ☁        ^^^      ^^^^^^        ☁                      |
+|▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓|
+|  ▲▲  原版世界早被熄了，这是 mod 重新搭的                 |
+|                                                          |
+| +--------------------------++--------------------------+ |
+| | HP [███████░░░]  80/120  || [聊天] 凛：哼，全是我画的| |
+| | Score 1337 · 帧 3/3      || [聊天] 不动笔你只能盯黑屏| |
+| +--------------------------++--------------------------+ |
+|                                                          |
+|  [原版四层] 背景✗ 世界✗ UI✗ 文字✗    [mod 重绘] ✓        |
+|  想看别的画面？再写个 mod 来抢画笔啊                     |
+|                                                          |
++----------------------------------------------------------+
+  [loader] 交错调用 describe()，验证 RETURN 是真的挂在每个出口上：
+[game] tick 第 4 次，状态：[burst] 我把 describe() 整个换掉了（当时已跑 4 tick）
+      [hello] RETURN 钩子：describe() 走了一个出口
+    tick#1 后 describe() = 已运行 4 次
+[game] tick 第 5 次，状态：[burst] 我把 describe() 整个换掉了（当时已跑 5 tick）
+      [hello] RETURN 钩子：describe() 走了一个出口
+    tick#2 后 describe() = 已运行 5 次
+[game] tick 第 6 次，状态：[burst] 我把 describe() 整个换掉了（当时已跑 6 tick）
+      [hello] RETURN 钩子：describe() 走了一个出口
+    tick#3 后 describe() = 已运行 6 次
+  [loader] 调用 status()，看 TAIL 钩子：
+      [hello] TAIL 钩子：status() 即将返回
+    status() 返回：motd=MiniLoader 演示服务端, ticks=6
+[burst] HEAD 注入：shutdown() 要来了
+[game] Server 关闭，总共运行 6 tick
+[滚木] 一圈滚完，没散架。
+=== 滚木加载器 结束 ===
